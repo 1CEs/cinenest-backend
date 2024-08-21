@@ -1,0 +1,97 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+model User {
+  userId String @id @default(uuid())
+  username String @unique @db.VarChar(20)
+  password String
+  birth DateTime
+  role Role
+  createdAt DateTime @default(now())
+}
+
+model Category {
+  categoryId Int @id @default(autoincrement())
+  categoryName String
+  movie Movie[]
+  serie SerieInfo[]
+}
+
+model Rating {
+  ratingId Int @id @default(autoincrement())
+  title String @unique @db.VarChar(10)
+  description String
+  movie Movie[]
+  serie SerieInfo[]
+}
+
+model Tag {
+  tagId Int @id @default(autoincrement())
+  title String @unique @db.VarChar(20)
+}
+
+model Video {
+  videoId String @id @default(uuid())
+  title String @unique @db.VarChar(255)
+  summary String
+  videoURL String
+  coverURL String
+  length Int
+  createdAt DateTime @default(now())
+  movie Movie[]
+  episode Episode[]
+}
+
+model Episode {
+  episodeId String @id @default(uuid())
+  videoId String
+  video Video @relation(fields: [videoId], references: [videoId])
+}
+
+model Serie {
+  serieId String @id @default(uuid())
+  season Int
+  infoId String
+  info SerieInfo @relation(fields: [infoId], references: [infoId])
+}
+
+model Movie {
+  movieId String @id @default(uuid())
+  videoId String
+  video Video @relation(fields: [videoId], references: [videoId])
+  ratingId Int
+  rating Rating @relation(fields: [ratingId], references: [ratingId])
+  categoryId Int
+  category Category @relation(fields: [categoryId], references: [categoryId])
+  tagId String
+}
+
+model SerieInfo {
+  infoId String @id @default(uuid())
+  title String @unique @db.VarChar(255)
+  summary String
+  coverURL String
+  ratingId Int
+  rating Rating @relation(fields: [ratingId], references: [ratingId])
+  tagId String
+  categoryId Int
+  category Category @relation(fields: [categoryId], references: [categoryId])
+  serie Serie[]
+}
